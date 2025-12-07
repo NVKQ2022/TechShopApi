@@ -1,0 +1,6 @@
+@TechShopApi_HostAddress = http://localhost:5069
+
+GET {{TechShopApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

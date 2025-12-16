@@ -27,11 +27,6 @@ namespace TechShop_API_backend_.Service
             {
                 FirebaseApp.Create(new AppOptions()
                 {
-                    //Credential = GoogleCredential.FromFile(
-                    //    Path.Combine(AppContext.BaseDirectory, "firebase", "webdev-project-22467-firebase-adminsdk-fbsvc-b6b185bb88.json")
-                    //)
-                    
-
                 Credential = GoogleCredential.FromFile(credentialPath)
             });
             }

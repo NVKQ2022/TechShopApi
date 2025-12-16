@@ -10,20 +10,30 @@ namespace TechShop_API_backend_.Service
     public class FcmService
     {
         private readonly UserFcmRepository _fcmRepository;
-
         public FcmService(UserFcmRepository fcmRepository)
         {
             _fcmRepository = fcmRepository;
 
+            var credentialPath =
+    Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+
+            if (string.IsNullOrEmpty(credentialPath) || !File.Exists(credentialPath))
+            {
+                throw new InvalidOperationException(
+                    "Firebase credentials not found. Check GOOGLE_APPLICATION_CREDENTIALS.");
+            }
             // Initialize Firebase only once
             if (FirebaseApp.DefaultInstance == null)
             {
                 FirebaseApp.Create(new AppOptions()
                 {
-                    Credential = GoogleCredential.FromFile(
-                        Path.Combine(AppContext.BaseDirectory, "firebase", "webdev-project-22467-firebase-adminsdk-fbsvc-b6b185bb88.json")
-                    )
-                });
+                    //Credential = GoogleCredential.FromFile(
+                    //    Path.Combine(AppContext.BaseDirectory, "firebase", "webdev-project-22467-firebase-adminsdk-fbsvc-b6b185bb88.json")
+                    //)
+                    
+
+                Credential = GoogleCredential.FromFile(credentialPath)
+            });
             }
         }
 

@@ -7,7 +7,7 @@
 # Ignore Visual Studio launch settings
 **/Properties/launchSettings.json
 *.json
-firebase/*.json
+#firebase/*.json
 
 # User-specific files
 *.rsuser

@@ -1,4 +1,4 @@
-name: .NET
+name: .NET CI/CD Pipeline
 
 on:
   push:
@@ -27,6 +27,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
 
+
     # ----------------------------
     # Build & Push Docker Image
     # ----------------------------
@@ -42,3 +43,4 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/techshopapi:latest
+

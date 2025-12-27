@@ -10,7 +10,24 @@ on:
 env:
   AZURE_WEBAPP_NAME: TechShop
 jobs:
+
+
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code_changed: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - '**'
+              - '!.github/workflows/**'
   build:
+    needs: changes
+    if: needs.changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -94,6 +111,7 @@ jobs:
 
   deploy-to-AKS:
     needs: build
+    if: needs.changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -123,4 +141,4 @@ jobs:
 
     - name: Helm install release
       run: |
-        helm install techshop-api-release nvkq2022/techshop-api -f values --set service.type=LoadBalancer
+        helm install techshop-api-release nvkq2022/techshop-api --version 1.0.1 -f values.yaml --set service.type=LoadBalancer

@@ -103,7 +103,9 @@ jobs:
         version: 'latest'
     - name: set up kubeconfig file
       run: |
-        echo "${{ secrets.KUBE_CONFIG }}"  > $HOME/.kube/config
+        pwd
+        pwd > $DIR
+        echo "${{ secrets.KUBE_CONFIG }}"  > $DIR/.kube/config
 
     - name : test create namespace
       run: |

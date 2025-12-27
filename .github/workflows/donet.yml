@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 env:
   AZURE_WEBAPP_NAME: TechShop
 jobs:
@@ -14,43 +15,27 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Get or Increment Version
+    - name: Get the Git Version
       run: |
-        # Path to buildinfo.txt
-        BUILDINFO_FILE="$GITHUB_WORKSPACE/buildinfo.txt"
-        
-        # Check if the file exists
-        if [ -f "$BUILDINFO_FILE" ]; then
-          # Read the current version from buildinfo.txt
-          VERSION=$(grep -E "^VERSION=" "$BUILDINFO_FILE" | cut -d '=' -f2)
-
-          if [ -n "$VERSION" ]; then
-            # Split the version into major, minor, patch
-            IFS='.' read -r MAJOR MINOR PATCH <<<"${VERSION//v/}"
-
-            # Increment the patch version
-            PATCH=$((PATCH + 1))
-
-            # Construct the new version
-            VERSION="v$MAJOR.$MINOR.$PATCH"
-          else
-            echo "No version found in $BUILDINFO_FILE. Starting from v1.0.0."
-            VERSION="v1.0.0"
-          fi
-        else
-          # If buildinfo.txt doesn't exist, start from v1.0.0
-          echo "No buildinfo.txt file found. Starting from v1.0.0."
-          VERSION="v1.0.0"
+        # Get the latest git tag (versioning strategy based on Git tags)
+        VERSION=$(git describe --tags --abbrev=0)  # Get latest tag, e.g. "v1.0.0"
+          
+        # If no tag found, fall back to commit hash
+        if [ -z "$VERSION" ]; then
+          VERSION="commit-$(git rev-parse --short HEAD)"
         fi
 
-        # Get the current build date and commit hash
+        # Get the current build date
         BUILD_DATE=$(date +'%Y-%m-%d')
+
+        # Get the latest commit hash
         COMMIT_HASH=$(git rev-parse --short HEAD)
 
-        # Write the new version, build date, and commit hash to buildinfo.txt
-        echo "VERSION=$VERSION" > "$BUILDINFO_FILE"
-        echo "BUILD_DATE=$BUILD_DATE" >> "$BUILDINFO_FILE"
-        echo "COMMIT_HASH=$COMMIT_HASH" >> "$BUILDINFO_FILE"
+        # Write the version, build date, and commit hash to buildinfo.txt
+        echo "VERSION=$VERSION" > $GITHUB_WORKSPACE/buildinfo.txt
+        echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_WORKSPACE/buildinfo.txt
+        echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_WORKSPACE/buildinfo.txt
+
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4

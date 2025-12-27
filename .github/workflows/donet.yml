@@ -111,5 +111,17 @@ jobs:
       run: |
         kubectl create namespace techshop
 
-    - name: Deploy to AKS
+
+    - name: Set up helm
+      uses: azure/setup-helm@v1
+      with:
+        version: 'latest'
+
+    - name: Helm add repo
       run: |
+        helm repo add nvkq2022 https://nvkq2022.github.io/helm-charts
+        helm repo update
+
+    - name: Helm install release
+      run: |
+        helm install techshop-api-release nvkq2022/techshop-api -f values --set service.type=LoadBalancer

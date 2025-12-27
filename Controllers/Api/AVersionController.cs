@@ -22,18 +22,18 @@ namespace TechShopApi.Controllers.Api
         [HttpGet]
         public IActionResult Version() //version2
         {
-            //var versionInfo = new
-            //{
-            //    Version = versionHelper.GetBuildInfo("VERSION"),
-            //    BuildDate = versionHelper.GetBuildInfo("BUILD_DATE"),
-            //    CommitHash = versionHelper.GetBuildInfo("COMMIT_HASH")
-            //};
             var versionInfo = new
             {
-                Version = 1,
-                BuildDate =1 ,
-                CommitHash =1 
+                Version = versionHelper.GetBuildInfo("VERSION"),
+                BuildDate = versionHelper.GetBuildInfo("BUILD_DATE"),
+                CommitHash = versionHelper.GetBuildInfo("COMMIT_HASH")
             };
+            //var versionInfo = new
+            //{
+            //    Version = 1,
+            //    BuildDate =1 ,
+            //    CommitHash =1 
+            //};
             return Ok(versionInfo);
         }
 

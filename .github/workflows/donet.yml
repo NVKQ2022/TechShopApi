@@ -14,6 +14,28 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Get the Git Version
+      run: |
+        # Get the latest git tag (versioning strategy based on Git tags)
+        VERSION=$(git describe --tags --abbrev=0)  # Get latest tag, e.g. "v1.0.0"
+          
+        # If no tag found, fall back to commit hash
+        if [ -z "$VERSION" ]; then
+          VERSION="commit-$(git rev-parse --short HEAD)"
+        fi
+
+        # Get the current build date
+        BUILD_DATE=$(date +'%Y-%m-%d')
+
+        # Get the latest commit hash
+        COMMIT_HASH=$(git rev-parse --short HEAD)
+
+        # Write the version, build date, and commit hash to buildinfo.txt
+        echo "VERSION=$VERSION" > $GITHUB_WORKSPACE/buildinfo.txt
+        echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_WORKSPACE/buildinfo.txt
+        echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_WORKSPACE/buildinfo.txt
+
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:

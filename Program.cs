@@ -14,6 +14,7 @@ using TechShop.API.Repositories;
 using TechShop_API_backend_.Helpers;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using TechShopApi.Helpers;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -25,6 +26,7 @@ builder.Services.AddControllers();
 // Add custom services
 builder.Services.AddScoped<SecurityHelper>();
 builder.Services.AddScoped<ConverterHelper>();
+builder.Services.AddScoped<VersionHelper>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthenticationRepository>();

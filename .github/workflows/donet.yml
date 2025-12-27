@@ -104,6 +104,7 @@ jobs:
     - name: set up kubeconfig file
       run: |
         echo "Setting up kubeconfig file"
+        mkdir -p ~/.kube
         echo "${{ secrets.KUBE_CONFIG }}"  > ~/.kube/config
 
     - name : test create namespace

@@ -35,6 +35,27 @@ jobs:
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #   - name: Download artifact from build job
+  #     uses: actions/download-artifact@v4
+  #     with:
+  #       name: webapp
+  #       path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+  #   - name: Azure Login
+  #     uses: azure/login@v2
+  #     with:
+  #       client-id: ${{ vars.TestCICD_CLIENT_ID_1CED }}
+  #       tenant-id: ${{ vars.TestCICD_TENANT_ID_78C7 }}
+  #       subscription-id: ${{ vars.TestCICD_SUBSCRIPTION_ID_78C7 }}
+  #   - name: Deploy to Azure WebApp
+  #     uses: azure/webapps-deploy@v2
+  #     with:
+  #       app-name: ${{ env.AZURE_WEBAPP_NAME }}
+  #       package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+  
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -43,15 +64,11 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: webapp
-        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-    - name: Azure Login
-      uses: azure/login@v2
-      with:
-        client-id: ${{ vars.TestCICD_CLIENT_ID_1CED }}
-        tenant-id: ${{ vars.TestCICD_TENANT_ID_78C7 }}
-        subscription-id: ${{ vars.TestCICD_SUBSCRIPTION_ID_78C7 }}
-    - name: Deploy to Azure WebApp
+
+    - name: deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_TESTCICD }}
+        slot-name: 'production'

@@ -141,4 +141,4 @@ jobs:
 
     - name: Helm install release
       run: |
-        helm install techshop-api-release nvkq2022/techshop-api --version 1.0.1 -f values.yaml --set service.type=LoadBalancer
+        helm install techshop-api-release nvkq2022/techshop-api --version 1.0.1  --set service.type=LoadBalancer

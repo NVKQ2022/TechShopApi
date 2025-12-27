@@ -20,7 +20,7 @@ namespace TechShopApi.Controllers.Api
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult Version()
+        public IActionResult Version() //version2
         {
             var versionInfo = new
             {

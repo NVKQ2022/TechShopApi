@@ -5,7 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
+env:
+  AZURE_WEBAPP_NAME: TechShop
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,3 +45,9 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/techshopapi:latest
 
+    - name: Deploy to Azure Web App (container)
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        images: ${{ secrets.DOCKER_USERNAME }}/techshopapi:latest
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_TESTCICD }}

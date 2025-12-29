@@ -34,7 +34,7 @@ jobs:
         run: kubectl get namespace techshop || kubectl create namespace techshop
       - name: Secret for techshop-api
         run: |
-          echo ${{ secrets.TECHSHOP_API_SECRET }} > techshop-api-secrets.yaml
+          echo "${{ secrets.TECHSHOP_API_SECRET }}" > techshop-api-secrets.yaml
           kubectl apply -f techshop-api-secrets.yaml
 
 

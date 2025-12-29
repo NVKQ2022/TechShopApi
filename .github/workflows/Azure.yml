@@ -40,16 +40,31 @@ jobs:
 
       - name: Create Firebase secret from file
         run: |
-          echo "${{ secrets.FIREBASE_ADMIN_SDK }}" > firebase-admin-sdk.json
+          echo "{${{ secrets.FIREBASE_ADMIN_SDK }}" | sed 's/\\n/\n/g' > firebase-admin-sdk.json
           cat firebase-admin-sdk.json
           kubectl create secret generic firebase-admin-sdk \
             --from-file=serviceAccount.json=firebase-admin-sdk.json\
             -n techshop \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Helm install release
+      - name: Helm uninstall release if exists
         run: |
-          helm install techshop-api-release nvkq2022/techshop-api --version 1.0.1  --set service.type=LoadBalancer
+          # Check if the Helm release exists
+          if helm list --namespace default | grep -q techshop-api-release; then
+            echo "Release 'techshop-api-release' exists, uninstalling it."
+            helm uninstall techshop-api-release --namespace default
+          else
+            echo "Release 'techshop-api-release' does not exist, skipping uninstall."
+          fi
+
+      - name: Helm install or upgrade release
+        run: |
+          # Install or upgrade the release
+          helm upgrade --install techshop-api-release nvkq2022/techshop-api \
+            --version 1.0.1 \
+            --set service.type=LoadBalancer \
+            --namespace default
+
       - name : Verify Deployment
         run: |
           kubectl get all -n techshop

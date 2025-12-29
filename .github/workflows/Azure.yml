@@ -40,8 +40,9 @@ jobs:
 
       - name: Create Firebase secret from file
         run: |
+          echo "${{ secrets.FIREBASE_ADMIN_SDK }}" > serviceAccount.json
           kubectl create secret generic firebase-admin-sdk \
-            --from-file=serviceAccount.json=${{ secrets.FIREBASE_ADMIN_SDK }} \
+            --from-file=serviceAccount.json\
             -n techshop \
             --dry-run=client -o yaml | kubectl apply -f -
 

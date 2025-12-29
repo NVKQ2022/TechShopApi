@@ -49,8 +49,12 @@ jobs:
 
       - name: Firebase Secret for techshop-api
         run: |
-          echo "${{ secrets.FIREBASE_ADMIN_SDK_B64 }}" | base64 -d  > firebase-admin-sdk.yaml
-          kubectl apply -f firebase-admin-sdk.yaml
+          echo "${{ secrets.FIREBASE_ADMIN_SDK_B64 }}" | base64 -d  > firebase-admin-sdk.json
+          cat firebase-admin-sdk.json
+          kubectl create secret generic firebase-admin-sdk \
+            --from-file=serviceAccount.json=firebase-admin-sdk.json\
+            -n techshop \
+            --dry-run=client -o yaml | kubectl apply -f -
       - name: Helm uninstall release if exists
         run: |
           # Check if the Helm release exists

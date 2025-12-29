@@ -23,15 +23,12 @@ jobs:
         run: |
           helm repo add nvkq2022 https://nvkq2022.github.io/helm-charts
           helm repo update
-      - name: Run Azure CLI command get k8s config
-        uses: azure/cli@v1
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
         with:
-          inlineScript: |
-            # Your Azure CLI commands go here
-            az account show
+          resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
 
-            az aks get-credentials --resource-group ${{ vars.AKS_RESOURCE_GROUP }} --name ${{ vars.AKS_CLUSTER_NAME }}
-            echo "Kubernetes config retrieved successfully."
       
       - name: Create Namespace if it does not exist
         run: kubectl get namespace techshop || kubectl create namespace techshop

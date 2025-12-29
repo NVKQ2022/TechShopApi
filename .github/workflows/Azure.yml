@@ -18,11 +18,34 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Helm add repo
+        run: |
+          helm repo add nvkq2022 https://nvkq2022.github.io/helm-charts
+          helm repo update
       - name: Run Azure CLI command get k8s config
         uses: azure/cli@v1
         with:
           inlineScript: |
             # Your Azure CLI commands go here
             az account show
+
             az aks get-credentials --resource-group ${{ vars.AKS_RESOURCE_GROUP }} --name ${{ vars.AKS_CLUSTER_NAME }}
             echo "Kubernetes config retrieved successfully."
+      
+      - name: Create Namespace if it does not exist
+        run: kubectl get namespace techshop || kubectl create namespace techshop
+      - name: Secret for techshop-api
+        run: |
+          echo ${{ secrets.TECHSHOP_API_SECRET }} > techshop-api-secrets.yaml
+          kubectl apply -f techshop-api-secrets.yaml
+          echo ${{ secrets.FIREBASE_ADMIN_SDK }} > firebase-admin-sdk.json
+          kubectl create secret generic firebase-admin-sdk --from-file=serviceAccount.json=firebase-admin-sdk.json -n techshop
+      - name: Helm install release
+        run: |
+          helm install techshop-api-release nvkq2022/techshop-api --version 1.0.1  --set service.type=LoadBalancer
+      - name : Verify Deployment
+        run: |
+          kubectl get all -n techshop
+          kubectl get secrets -n techshop
+          helm status techshop-api-release

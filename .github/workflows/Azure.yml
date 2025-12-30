@@ -10,29 +10,32 @@ permissions:
     contents: read
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
+    # ----------------------------
+    # .NET SDK + NuGet cache
+    # ----------------------------
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+        cache: true
 
     - name: Restore dependencies
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build --configuration Release --no-restore
 
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --configuration Release --no-build
 
     # ----------------------------
-    # Build & Push Docker Image
+    # Docker Login (after tests)
     # ----------------------------
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
@@ -40,13 +43,17 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_TOKEN }}
 
+    # ----------------------------
+    # Docker Build with layer cache
+    # ----------------------------
     - name: Build and Push Docker image
       uses: docker/build-push-action@v6
       with:
         context: .
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/techshopapi:latest
-
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
 
 
@@ -71,14 +78,7 @@ jobs:
 
 
 
-      
-
-      - name: Upload kubeconfig artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kubeconfig
-          path: ${{ env.KUBECONFIG }}
-
+    
       - name: Create Namespace if it does not exist
         run: kubectl get namespace techshop || kubectl create namespace techshop
       - name: Secret for techshop-api
@@ -103,25 +103,20 @@ jobs:
 
   helm-deploy:
     runs-on: ubuntu-latest
-    needs: azure-login
+    needs: build
     steps:
-      # - name: Azure Login
-      #   uses: azure/login@v2
-      #   with:
-      #     client-id: ${{ secrets.AZURE_CLIENT_ID }}
-      #     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      # - name: Set AKS context
-      #   uses: azure/aks-set-context@v3
-      #   with:
-      #     resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
-      #     cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
-      - name: Download Kubeconfig artifact
-        uses: actions/download-artifact@v4
+      - name: Azure Login
+        uses: azure/login@v2
         with:
-          name: kubeconfig
-          path: ~/.kube
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
 
       - name: Create KUBECONFIG env variable
         run: export KUBECONFIG=~/.kube/kubeconfig

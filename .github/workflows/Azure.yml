@@ -117,7 +117,7 @@ jobs:
       #     resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
       #     cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
       - name: Download Kubeconfig artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: kubeconfig
           path: ~/.kube

@@ -26,7 +26,8 @@ namespace TechShopApi.Controllers.Api
             {
                 Version = versionHelper.GetBuildInfo("VERSION"),
                 BuildDate = versionHelper.GetBuildInfo("BUILD_DATE"),
-                CommitHash = versionHelper.GetBuildInfo("COMMIT_HASH")
+                CommitHash = versionHelper.GetBuildInfo("COMMIT_HASH"),
+                test = 1
             };
             //var versionInfo = new
             //{

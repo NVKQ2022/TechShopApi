@@ -71,12 +71,16 @@ jobs:
 
 
 
-      - name: Upload kubeconfig
+      - name: Verify kubeconfig file exists
+        run: |
+          ls -l ~/.kube/config
+          cat ~/.kube/config
+
+      - name: Upload kubeconfig artifact
         uses: actions/upload-artifact@v4
         with:
           name: kubeconfig
           path: ~/.kube/config
-          retention-days: 1
 
       - name: Create Namespace if it does not exist
         run: kubectl get namespace techshop || kubectl create namespace techshop

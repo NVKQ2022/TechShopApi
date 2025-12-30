@@ -124,7 +124,7 @@ jobs:
           path: ~/.kube
 
       - name: Create KUBECONFIG env variable
-        run: export KUBECONFIG=~/.kube/config
+        run: export KUBECONFIG=~/.kube/kubeconfig
 
       - name: Helm add repo
         run: |

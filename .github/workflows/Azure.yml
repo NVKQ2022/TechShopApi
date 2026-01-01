@@ -110,8 +110,16 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/techshopapi:latest
-
-
+          
+     - name: trivy image scaning
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: 'docker.io/${{ secrets.DOCKER_USERNAME }}/techshopapi:latest'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
 
   azure-login:

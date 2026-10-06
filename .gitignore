@@ -7,7 +7,15 @@
 # Ignore Visual Studio launch settings
 **/Properties/launchSettings.json
 *.json
-#firebase/*.json
+!appsettings.json
+!appsettings.*.json
+firebase/*.json
+
+# Local tooling & AI agents
+.claude/
+.codegraph/
+opencode.jsonc
+AGENTS.md
 
 # User-specific files
 *.rsuser

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -325,6 +325,11 @@ namespace TechShop_API_backend_.Controllers.Api
             try
             {
                 var user = await _userRepository.GetUserByUsernameAsync(loginRequest.Username);
+                if (user == null)
+                {
+                    _logger.LogWarning("Login failed for username: {Username}. User not found.", loginRequest.Username);
+                    return Unauthorized(new { Message = "Invalid username or password." });
+                }
 
                 if (!user.IsEmailVerified)
                 {

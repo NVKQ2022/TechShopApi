@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using TechShop_API_backend_.Models;
 using TechShop_API_backend_.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -27,10 +27,17 @@ namespace TechShop_API_backend_.Controllers.Api
         // GET: api/<UserController>
         [Authorize(Roles = "Admin")]
         [HttpGet("List")]
-        public async Task<List<User>> Get()
+        public async Task<IActionResult> Get()
         {
             List<User> users = await _userRepository.GetAllUsersAsync();
-            return users;
+            var dtos = users.Select(u => new UserResponseDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                Username = u.Username,
+                IsAdmin = u.IsAdmin
+            }).ToList();
+            return Ok(dtos);
         }
 
         // GET api/<UserController>/5
@@ -43,9 +50,14 @@ namespace TechShop_API_backend_.Controllers.Api
             {
                 return NotFound();
             }
-            return Ok(user);
+            return Ok(new UserResponseDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Username = user.Username,
+                IsAdmin = user.IsAdmin
+            });
         }
-
 
         // POST api/<UserController>
         [Authorize(Roles = "Admin")]
@@ -58,10 +70,18 @@ namespace TechShop_API_backend_.Controllers.Api
             }
 
             var createdUser = await _userRepository.CreateUserAsync(newUser.Email, newUser.Username, newUser.Password, string.Empty, false);
+            if (!createdUser.Success || createdUser.CreatedUser == null)
+            {
+                return BadRequest(new { message = createdUser.ErrorMessage });
+            }
 
-
-
-            return CreatedAtAction(nameof(Get), new { id = createdUser.CreatedUser.Id }, createdUser);
+            return CreatedAtAction(nameof(Info), new { id = createdUser.CreatedUser.Id }, new UserResponseDto
+            {
+                Id = createdUser.CreatedUser.Id,
+                Email = createdUser.CreatedUser.Email,
+                Username = createdUser.CreatedUser.Username,
+                IsAdmin = createdUser.CreatedUser.IsAdmin
+            });
         }
 
 
@@ -187,27 +207,46 @@ namespace TechShop_API_backend_.Controllers.Api
         [HttpPut("Account/Update/Password")]
         public async Task<IActionResult> Update([FromBody] UpdateUserDto updateUserDto)  //// DONE
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userUpdate = await _userRepository.GetUserByIdAsync(int.Parse(userId));
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdStr, out int userId))
+            {
+                return Unauthorized();
+            }
+
+            var userUpdate = await _userRepository.GetUserByIdAsync(userId);
             if (userUpdate == null)
             {
                 return Unauthorized();
             }
+
+            if (string.IsNullOrWhiteSpace(updateUserDto?.Password))
+            {
+                return BadRequest("Password is required.");
+            }
+
             var result = SecurityHelper.CheckPasswordStrength(updateUserDto.Password);
-            if (result.IsStrong == false)
+            if (!result.IsStrong)
             {
-                return BadRequest($"The password  is not strong enough");
+                return BadRequest("The password is not strong enough.");
             }
 
-
-            if (SecurityHelper.HashPassword(updateUserDto.Password, userUpdate.Salt) == userUpdate.Password)
+            if (SecurityHelper.VerifyPassword(updateUserDto.Password, userUpdate.Salt, userUpdate.Password))
             {
-                throw new Exception("New password must be different from the old password");
+                return BadRequest("New password must be different from the old password.");
             }
 
+            var newSalt = SecurityHelper.GenerateSalt();
+            var newHashedPassword = SecurityHelper.HashPassword(updateUserDto.Password, newSalt);
+            userUpdate.Password = newHashedPassword;
+            userUpdate.Salt = newSalt;
 
-            await _userRepository.UpdateUserAsync(userUpdate);
-            return Ok();
+            bool updated = await _userRepository.UpdateUserAsync(userUpdate);
+            if (!updated)
+            {
+                return StatusCode(500, "Failed to update password.");
+            }
+
+            return Ok(new { message = "Password updated successfully." });
         }
 
 

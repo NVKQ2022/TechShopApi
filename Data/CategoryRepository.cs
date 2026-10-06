@@ -1,4 +1,4 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
 using MongoDB.Bson;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +12,9 @@ public class CategoryRepository : ICategoryRepository
     private readonly IMongoCollection<Product> _products;
     private readonly IMongoCollection<Category> _categories;
 
-    public CategoryRepository(IOptions<MongoDbSettings> settings)
+    public CategoryRepository(IOptions<MongoDbSettings> settings, IMongoClient? mongoClient = null)
     {
-        var client = new MongoClient(settings.Value.ConnectionString);
+        var client = mongoClient ?? new MongoClient(settings.Value.ConnectionString);
         var database = client.GetDatabase(settings.Value.DatabaseName);
         _products = database.GetCollection<Product>(settings.Value.ProductCollectionName);
         _categories = database.GetCollection<Category>(settings.Value.CategoryCollectionName);

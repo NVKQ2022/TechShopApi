@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using TechShop_API_backend_.Interfaces;
 using TechShop_API_backend_.Models;
@@ -9,10 +9,9 @@ namespace TechShop_API_backend_.Data
     {
         private readonly IMongoCollection<UserDetail> _userDetail;
 
-        public UserDetailRepository(IOptions<MongoDbSettings> settings)
+        public UserDetailRepository(IOptions<MongoDbSettings> settings, IMongoClient? mongoClient = null)
         {
-            
-            var client = new MongoClient(settings.Value.ConnectionString);
+            var client = mongoClient ?? new MongoClient(settings.Value.ConnectionString);
             var database = client.GetDatabase(settings.Value.DatabaseName);
             _userDetail = database.GetCollection<UserDetail>(settings.Value.UserDetailCollectionName);
         }
@@ -269,7 +268,7 @@ namespace TechShop_API_backend_.Data
                 //    Builders<UserDetail>.Filter.ElemMatch(u => u.Cart, i => i.ProductId == item.ProductId)
                 //);
 
-                InsertCartItemQuantityAsync(userId, item.ProductId, existingItem.Quantity + item.Quantity);
+                await InsertCartItemQuantityAsync(userId, item.ProductId, existingItem.Quantity + item.Quantity);
                 //await _userDetail.UpdateOneAsync(arrayFilter, update);
                 return false;
             }

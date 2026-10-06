@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using TechShop_API_backend_.Interfaces;
 using TechShop_API_backend_.Models;
@@ -8,9 +8,9 @@ namespace TechShop_API_backend_.Data
     public class ReviewRepository : IReviewRepository
     {
         private readonly IMongoCollection<Review> reviewCollection;
-        public ReviewRepository(IOptions<MongoDbSettings> settings)
+        public ReviewRepository(IOptions<MongoDbSettings> settings, IMongoClient? mongoClient = null)
         {
-            var client = new MongoClient(settings.Value.ConnectionString);
+            var client = mongoClient ?? new MongoClient(settings.Value.ConnectionString);
             var database = client.GetDatabase(settings.Value.DatabaseName);
             reviewCollection = database.GetCollection<Review>(settings.Value.ReviewCollectionName);
         }

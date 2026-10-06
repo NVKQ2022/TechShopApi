@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -19,10 +19,10 @@ namespace TechShop_API_backend_.Data
         private readonly IMongoCollection<ProductSaleEvent> _saleEvents;
 
         public AdminRepository(AuthenticateDbContext context, IOptions<MongoDbSettings> settings, OrderRepository orderRepository, ProductRepository productRepository,
-                                UserDetailRepository userDetailRepository)
+                                UserDetailRepository userDetailRepository, IMongoClient? mongoClient = null)
         {
             _context = context;
-            var client = new MongoClient(settings.Value.ConnectionString);
+            var client = mongoClient ?? new MongoClient(settings.Value.ConnectionString);
             var database = client.GetDatabase(settings.Value.DatabaseName);
             _order = database.GetCollection<Order>(settings.Value.OrderCollectionName);
             _saleEvents = database.GetCollection<ProductSaleEvent>(settings.Value.ProductSaleEventCollectionName);

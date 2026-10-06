@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using TechShop_API_backend_.Models;
 
@@ -8,9 +8,9 @@ namespace TechShop_API_backend_.Data
     {
         private readonly IMongoCollection<Order> _orders;
 
-        public OrderRepository(IOptions<MongoDbSettings> settings)
+        public OrderRepository(IOptions<MongoDbSettings> settings, IMongoClient? mongoClient = null)
         {
-            var client = new MongoClient(settings.Value.ConnectionString);
+            var client = mongoClient ?? new MongoClient(settings.Value.ConnectionString);
             var database = client.GetDatabase(settings.Value.DatabaseName);
             _orders = database.GetCollection<Order>(settings.Value.OrderCollectionName);
         }

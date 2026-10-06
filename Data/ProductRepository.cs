@@ -1,4 +1,4 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
 using Microsoft.Extensions.Options;
 using TechShop_API_backend_.Models;
 using TechShop_API_backend_.Interfaces;
@@ -11,9 +11,9 @@ public class ProductRepository
 {
     private readonly IMongoCollection<Product> _products;
 
-    public ProductRepository(IOptions<MongoDbSettings> settings)
+    public ProductRepository(IOptions<MongoDbSettings> settings, IMongoClient? mongoClient = null)
     {
-        var client = new MongoClient(settings.Value.ConnectionString);
+        var client = mongoClient ?? new MongoClient(settings.Value.ConnectionString);
         var database = client.GetDatabase(settings.Value.DatabaseName);
         _products = database.GetCollection<Product>(settings.Value.ProductCollectionName);
     }

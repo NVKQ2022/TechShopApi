@@ -1,4 +1,4 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
 using TechShop_API_backend_.Models;
 using Microsoft.Extensions.Options;
 
@@ -8,9 +8,9 @@ namespace TechShop_API_backend_.Data
     {
         private readonly IMongoCollection<Notification> _notification;
 
-        public NotificationRepository(IOptions<MongoDbSettings> settings)
+        public NotificationRepository(IOptions<MongoDbSettings> settings, IMongoClient? mongoClient = null)
         {
-            var client = new MongoClient(settings.Value.ConnectionString);
+            var client = mongoClient ?? new MongoClient(settings.Value.ConnectionString);
             var database = client.GetDatabase(settings.Value.DatabaseName);
             _notification = database.GetCollection<Notification>(settings.Value.NotificationCollectionName);
         }

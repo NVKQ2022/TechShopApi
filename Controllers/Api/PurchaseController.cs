@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,15 +17,24 @@ namespace TechShop_API_backend_.Controllers.Api
     public class PurchaseController : ControllerBase
     {
 
-        UserDetailRepository _detailRepository;
-        UserRepository _userRepository;
-        ProductRepository _productRepository;
-        OrderRepository _orderRepository;
-        PaymentService _vnPayService;
-        JwtService _jwtService;
+        private readonly UserDetailRepository _detailRepository;
+        private readonly UserRepository _userRepository;
+        private readonly ProductRepository _productRepository;
+        private readonly OrderRepository _orderRepository;
+        private readonly PaymentService _vnPayService;
+        private readonly JwtService _jwtService;
+        private readonly IConfiguration _config;
         private const string VALID_USERNAME = "techshop_username";
         private const string VALID_PASSWORD = "techshop_password";
-        public PurchaseController(UserDetailRepository detailRepository,JwtService jwtService, UserRepository userRepository , ProductRepository productRepository, OrderRepository orderRepository,PaymentService vnpayService)
+
+        public PurchaseController(
+            UserDetailRepository detailRepository,
+            JwtService jwtService,
+            UserRepository userRepository,
+            ProductRepository productRepository,
+            OrderRepository orderRepository,
+            PaymentService vnpayService,
+            IConfiguration config)
         {
             _detailRepository = detailRepository;
             _productRepository = productRepository;
@@ -33,12 +42,10 @@ namespace TechShop_API_backend_.Controllers.Api
             _vnPayService = vnpayService;
             _jwtService = jwtService;
             _userRepository = userRepository;
+            _config = config;
         }
 
-
-
-
-
+        [Authorize]
         [HttpPost("confirm/{orderId}")]
         public async Task<IActionResult> ConfirmOrder(string orderId, [FromBody] ConfirmOrderRequest request)
         {
@@ -48,6 +55,12 @@ namespace TechShop_API_backend_.Controllers.Api
             if (order == null)
             {
                 return NotFound($"Order with ID {orderId} not found.");
+            }
+
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId) || (order.UserID != userId && !User.IsInRole("Admin")))
+            {
+                return Forbid("You are not allowed to confirm this order.");
             }
 
             // Check if the order is already confirmed or processed
@@ -178,10 +191,19 @@ namespace TechShop_API_backend_.Controllers.Api
             var username = values[0];
             var password = values[1];
 
+            var expectedUsername = _config["VietQR:Username"] ?? VALID_USERNAME;
+            var expectedPassword = _config["VietQR:Password"] ?? VALID_PASSWORD;
+
             // Kiểm tra username và password
-            if (username == VALID_USERNAME && password == VALID_PASSWORD)
+            if (username == expectedUsername && password == expectedPassword)
             {
-                var token = _jwtService.GenerateToken(await _userRepository.GetUserByUsernameAsync("vietqruser"));
+                var user = await _userRepository.GetUserByUsernameAsync("vietqruser");
+                if (user == null)
+                {
+                    return StatusCode(500, "VietQR service user not found.");
+                }
+
+                var token = _jwtService.GenerateToken(user);
                 return Ok(new
                 {
                     access_token = token,

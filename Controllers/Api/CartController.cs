@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +13,7 @@ namespace TechShop_API_backend_.Controllers.Api
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CartController : ControllerBase
     {
 
@@ -26,14 +27,19 @@ namespace TechShop_API_backend_.Controllers.Api
             _productRepository = productRepository;
         }
 
-        [Authorize]
+        private bool TryGetUserId(out int userId)
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdStr, out userId);
+        }
+
         [HttpGet("check")]
         public async Task<IActionResult> CheckIsAdded(string productId)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var success = await _userDetailRepository.IsProductInCartAsync(int.Parse(userId), productId);
+            if (!TryGetUserId(out int userId))
+                return Unauthorized("User ID not found in token.");
 
-
+            var success = await _userDetailRepository.IsProductInCartAsync(userId, productId);
             return Ok(success);
         }
 

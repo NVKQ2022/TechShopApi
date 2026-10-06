@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TechShop.API.Models;
@@ -12,6 +12,7 @@ namespace TechShop_API_backend_.Controllers.Api
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class TestController : ControllerBase
     {
         private readonly IConfiguration _config;
@@ -55,7 +56,6 @@ namespace TechShop_API_backend_.Controllers.Api
 
 
 
-        [AllowAnonymous]
         [HttpPost("test")]
         public async Task<IActionResult> TestOTP() //DONE
         {
@@ -87,19 +87,14 @@ namespace TechShop_API_backend_.Controllers.Api
         }
 
 
-        [AllowAnonymous]
         [HttpPost("wishlist")]
-
         public async Task<IActionResult> TestWishlist() //DONE
         {
-            _userDetailRepository.EnsureWishlistFieldExists();
+            await _userDetailRepository.EnsureWishlistFieldExists();
             return Ok("Wishlist field ensured.");
-
         }
 
 
-
-        [AllowAnonymous]
         [HttpPost("AddRandomStockForAllProduct")]
         public async Task<IActionResult> AddRandomStock() //DONE
         {
@@ -121,7 +116,6 @@ namespace TechShop_API_backend_.Controllers.Api
         }
 
 
-        [AllowAnonymous]
         [HttpPost("ensureHaveSaleInfo")]
         public async Task<IActionResult> EnsureSaleInfo()
         {
@@ -130,9 +124,7 @@ namespace TechShop_API_backend_.Controllers.Api
         }
 
 
-        [AllowAnonymous]
         [HttpPost("RandomSale/{number}")]
-
         public async Task<IActionResult> RandomSale(int number)
         {
             await _productRepository.ApplyRandomSalesAsync(number);

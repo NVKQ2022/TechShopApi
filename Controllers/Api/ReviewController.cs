@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TechShop_API_backend_.Models;
@@ -16,10 +16,8 @@ namespace TechShop_API_backend_.Controllers.Api
     public class ReviewController : ControllerBase
     {
 
-        ReviewRepository _reviewRepository;
+        private readonly ReviewRepository _reviewRepository;
         private readonly ProductRepository _productRepository;
-        private readonly string _imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "UploadedImages");
-        private readonly IAmazonS3 _s3Client;
         private readonly ImageService _imageService;
         public ReviewController(ReviewRepository reviewRepository, ImageService imageService, ProductRepository productRepository)
         {
@@ -45,18 +43,18 @@ namespace TechShop_API_backend_.Controllers.Api
             return Ok(reviews);
         }
 
-        // GET: api/review/{id}
-        [HttpGet("{id:length(24)}", Name = "GetReview")]
-        public async Task<IActionResult> GetById(int id)
+        // GET: api/review/user/{userId}
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetByUserId(int userId)
         {
-            var review = await _reviewRepository.GetReviewsByUserIdAsync(id);
-            if (review == null)
+            var reviews = await _reviewRepository.GetReviewsByUserIdAsync(userId);
+            if (reviews == null || reviews.Count == 0)
                 return NotFound();
 
-            return Ok(review);
+            return Ok(reviews);
         }
 
-        // POST: api/review
+        // POST: api/review/Create
         [Authorize]
         [HttpPost("Create")]
         public async Task<IActionResult> CreateReviewInDirectory([FromForm] CreateReviewRequestDto reviewDto)
@@ -72,8 +70,11 @@ namespace TechShop_API_backend_.Controllers.Api
                 return BadRequest("Stars must be between 1 and 5.");
             }
 
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
 
             // Initialize the Review object to save in the database
             var product = await _productRepository.GetByIdAsync(reviewDto.ProductId);
@@ -84,7 +85,7 @@ namespace TechShop_API_backend_.Controllers.Api
 
             var review = new Review
             {
-                UserID = int.Parse(userId),
+                UserID = userId,
                 ProductId = reviewDto.ProductId,
                 Stars = reviewDto.Stars,
                 Comment = reviewDto.Comment,
@@ -93,25 +94,23 @@ namespace TechShop_API_backend_.Controllers.Api
             };
 
             // Upload the media files and add their URLs to the review
-            foreach (var file in reviewDto.MediaFiles)
+            if (reviewDto.MediaFiles != null)
             {
-                var imageUrl = await _imageService.UploadImageAsync(file);
-                review.MediaURLs.Add(imageUrl);
+                foreach (var file in reviewDto.MediaFiles)
+                {
+                    var imageUrl = await _imageService.UploadImageAsync(file);
+                    review.MediaURLs.Add(imageUrl);
+                }
             }
 
-            // Save the review to your database (e.g., MongoDB, SQL)
+            // Save the review to database
             await _reviewRepository.CreateReviewAsync(review);
 
-            // Return a success message
             return Ok("Review created successfully.");
         }
 
-
-
-
-
-
         // DELETE: api/review/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -122,9 +121,6 @@ namespace TechShop_API_backend_.Controllers.Api
             }
 
             return NotFound();
-
-
-
         }
     }
 

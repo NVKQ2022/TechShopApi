@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TechShop_API_backend_.Data;
@@ -8,6 +9,7 @@ namespace TechShop_API_backend_.Controllers.Api
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class NotificationController : ControllerBase
     {
         private readonly NotificationRepository _repository;
@@ -18,13 +20,13 @@ namespace TechShop_API_backend_.Controllers.Api
         }
 
         // POST: api/notifications/send
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpPost("send")]
         public async Task<IActionResult> SendNotification([FromBody] Notification notification)
         {
             if (notification == null || string.IsNullOrEmpty(notification.Username))
                 return BadRequest("Invalid notification data");
-            notification.Id = null;
+            notification.Id = null!;
             notification.IsRead = false;
             await _repository.CreateAsync(notification);
             return Ok(new { message = "Notification created successfully", notificationId = notification.Id });
@@ -34,6 +36,12 @@ namespace TechShop_API_backend_.Controllers.Api
         [HttpGet("unread/{username}")]
         public async Task<IActionResult> GetUnreadNotifications(string username)
         {
+            var currentUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+            if (currentUsername != username && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             var notifications = await _repository.GetUnreadAsync(username);
             return Ok(notifications);
         }
@@ -42,6 +50,12 @@ namespace TechShop_API_backend_.Controllers.Api
         [HttpGet("all/{username}")]
         public async Task<IActionResult> GetAllNotifications(string username)
         {
+            var currentUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+            if (currentUsername != username && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             var notifications = await _repository.GetAllByUserAsync(username);
             return Ok(notifications);
         }
@@ -58,6 +72,12 @@ namespace TechShop_API_backend_.Controllers.Api
         [HttpPost("readall/{username}")]
         public async Task<IActionResult> MarkAllAsRead(string username)
         {
+            var currentUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+            if (currentUsername != username && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             await _repository.MarkAllAsReadAsync(username);
             return Ok(new { message = "All notifications marked as read" });
         }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TechShop_API_backend_.Data;
 using TechShop_API_backend_.DTOs.Admin;
@@ -9,7 +9,7 @@ namespace TechShop_API_backend_.Controllers.Api
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly AdminRepository _adminRepository;

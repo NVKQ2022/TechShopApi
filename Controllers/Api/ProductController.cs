@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using TechShop_API_backend_.Data;
@@ -41,7 +41,7 @@ namespace TechShop_API_backend_.Controllers.Api
         [HttpGet("Fetch")]
         public async Task<IActionResult> GetListProducts(int number)
         {
-            var isLogging = User.Identity.IsAuthenticated; // Check if the user is authenticated (logged in)
+            var isLogging = User.Identity?.IsAuthenticated == true; // Check if the user is authenticated (logged in)
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             List<Product> products;

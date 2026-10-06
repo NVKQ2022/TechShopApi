@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TechShop_API_backend_.Data;
@@ -64,6 +64,20 @@ namespace TechShop_API_backend_.Controllers.Api
             {
                 return NotFound();
             }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                if (order.UserID != userId && !User.IsInRole("Admin"))
+                {
+                    return Forbid("You are not allowed to view this order.");
+                }
+            }
+            else if (!User.IsInRole("Admin"))
+            {
+                return Unauthorized();
+            }
+
             return Ok(order);
         }
 
@@ -182,6 +196,16 @@ namespace TechShop_API_backend_.Controllers.Api
             // Only allow cancellation if status is "Pending" or "NotConfirm"
             if (order.Status != "Pending" && order.Status != "NotConfirm")
                 return BadRequest("Only pending or not confirmed orders can be cancelled.");
+
+            // Restore product stock if order was already confirmed/pending
+            if (order.Status == "Pending" && order.Items != null)
+            {
+                foreach (var item in order.Items)
+                {
+                    await _productRepository.IncreaseProductStockAsync(item.ProductID, item.Quantity);
+                }
+            }
+
             var success = await _orderRepository.CancelOrder(orderId);
             if (!success)
                 return StatusCode(500, "Failed to cancel the order.");
@@ -337,9 +361,9 @@ namespace TechShop_API_backend_.Controllers.Api
                 // Decrease stock for new quantity
                 await _productRepository.DecreaseProductStockAsync(item.ProductID, item.Quantity);
 
-                // Build order item (preserve historical price if provided)
+                // Build order item using verified database price
                 var orderItem = converterHelper.ConvertProductToOrderItem(product, item.Quantity);
-                orderItem.UnitPrice = item.UnitPrice > 0 ? item.UnitPrice : product.Price;
+                orderItem.UnitPrice = product.Price;
 
                 orderItemsVerify.Add(orderItem);
 

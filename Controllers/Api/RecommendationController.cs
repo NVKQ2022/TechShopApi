@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TechShop_API_backend_.Helpers;
@@ -11,10 +11,13 @@ namespace TechShop_API_backend_.Controllers.Api
     public class RecommendationController : ControllerBase
     {
         private readonly RecommendationService _service;
-        private readonly ILogger _logger;
         private readonly ProductRepository _productRepository;
-        ConverterHelper _converter;
-        public RecommendationController(RecommendationService service, ProductRepository productRepository, ConverterHelper converterHelper)
+        private readonly ConverterHelper _converter;
+
+        public RecommendationController(
+            RecommendationService service,
+            ProductRepository productRepository,
+            ConverterHelper converterHelper)
         {
             _service = service;
             _converter = converterHelper;
@@ -54,9 +57,9 @@ namespace TechShop_API_backend_.Controllers.Api
         // ----------------------------------------------------
         [AllowAnonymous]
         [HttpGet("ids/{productId}")]
-        public async Task<IActionResult> RecommendIds(string productId, [FromQuery] int limit = 5)
+        public IActionResult RecommendIds(string productId, [FromQuery] int limit = 5)
         {
-            var ids =  RecommendationService.RecommendProductIds(productId, limit);
+            var ids = RecommendationService.RecommendProductIds(productId, limit);
 
             Console.WriteLine("=== Recommended IDs ===");
             foreach (var id in ids)
@@ -73,7 +76,7 @@ namespace TechShop_API_backend_.Controllers.Api
         // ----------------------------------------------------
         // 3. Force rebuild matrix manually (admin use)
         // ----------------------------------------------------
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpPost("rebuild")]
         public IActionResult RebuildMatrix()
         {
@@ -81,7 +84,7 @@ namespace TechShop_API_backend_.Controllers.Api
             return Ok(new { message = "Matrix rebuilt successfully" });
         }
 
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpPost("build")]
         public async Task<IActionResult> BuildMatrix()
         {

@@ -11,9 +11,9 @@ namespace TechShop_API_backend_.Service
     private readonly IMongoDatabase _db;
     private readonly IMongoDatabase _adminDb;
 
-    public MongoMetricsService(IOptions<MongoDbSettings> settings)
+    public MongoMetricsService(IOptions<MongoDbSettings> settings, IMongoClient? mongoClient = null)
     {
-      _client = new MongoClient(settings.Value.ConnectionString);
+      _client = mongoClient ?? new MongoClient(settings.Value.ConnectionString);
       _db = _client.GetDatabase(settings.Value.DatabaseName);
       _adminDb = _client.GetDatabase("admin");
     }

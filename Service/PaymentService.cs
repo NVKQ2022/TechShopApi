@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -16,10 +16,10 @@ namespace TechShop_API_backend_.Service
 
         public string CreateQrPaymentUrl(HttpContext context, int amount, string orderId)
         {
-            string vnp_Returnurl = _config["VnPay:ReturnUrl"];
-            string vnp_Url = _config["VnPay:BaseUrl"];
-            string vnp_TmnCode = _config["VnPay:TmnCode"];
-            string vnp_HashSecret = _config["VnPay:HashSecret"];
+            string vnp_Returnurl = _config["VnPay:ReturnUrl"] ?? "";
+            string vnp_Url = _config["VnPay:BaseUrl"] ?? "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+            string vnp_TmnCode = _config["VnPay:TmnCode"] ?? "";
+            string vnp_HashSecret = _config["VnPay:HashSecret"] ?? "";
 
             var vnpay = new VnPayLibrary();
 
@@ -30,7 +30,8 @@ namespace TechShop_API_backend_.Service
             vnpay.AddRequestData("vnp_Amount", (amount * 100).ToString());
             vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", "VND");
-            vnpay.AddRequestData("vnp_IpAddr", context.Connection.RemoteIpAddress.ToString());
+            string ipAddress = context.Connection?.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+            vnpay.AddRequestData("vnp_IpAddr", ipAddress);
             vnpay.AddRequestData("vnp_OrderInfo", "QR Payment");
             vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
             vnpay.AddRequestData("vnp_TxnRef", orderId);

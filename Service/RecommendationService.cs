@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using TechShop_API_backend_.Data;
 using TechShop_API_backend_.Models;
@@ -22,8 +22,17 @@ namespace TechShop_API_backend_.Service
             _orderRepository = orderRepository;
             _productRepository = productRepository;
 
-            Console.WriteLine("🔥 RecommendationService constructor called!");
-            BuildMatrix();
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await BuildMatrix();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Recommendation matrix build warning: " + ex.Message);
+                }
+            });
         }
 
         // ----------------------------------------------
@@ -31,6 +40,12 @@ namespace TechShop_API_backend_.Service
         // ----------------------------------------------
         public static async Task BuildMatrix()
         {
+            if (_orderRepository == null)
+            {
+                Console.WriteLine("OrderRepository is null, skipping matrix build.");
+                return;
+            }
+
             SimilarityMatrix.Clear();
 
             var orders = await _orderRepository.GetAllOrdersAsync();
@@ -149,7 +164,17 @@ namespace TechShop_API_backend_.Service
         // ----------------------------------------------
         public static void RefreshMatrix()
         {
-            BuildMatrix();
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await BuildMatrix();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error rebuilding recommendation matrix: {ex.Message}");
+                }
+            });
         }
     }
 }

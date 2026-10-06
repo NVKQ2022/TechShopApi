@@ -1,4 +1,4 @@
-﻿
+
 using System.Net.Mail;
 using System.Net;
 using System.Security.Cryptography;
@@ -8,7 +8,7 @@ namespace TechShop_API_backend_.Helpers
 {
     public class SecurityHelper
     {
-        private static readonly string myPepper = Environment.GetEnvironmentVariable("Security__Pepper");
+        private static readonly string myPepper = Environment.GetEnvironmentVariable("Security__Pepper") ?? "TechShopDefaultPepperKey";
 
         public SecurityHelper(/*IConfiguration configuration*/)
         {
@@ -64,8 +64,13 @@ namespace TechShop_API_backend_.Helpers
 
         public static bool VerifyPassword(string inputPassword, string storedSalt, string passwordHash) // use when login
         {
+            if (string.IsNullOrEmpty(inputPassword) || string.IsNullOrEmpty(passwordHash))
+                return false;
+
             string newHash = HashPassword(inputPassword, storedSalt);
-            return passwordHash == newHash;
+            return CryptographicOperations.FixedTimeEquals(
+                Encoding.UTF8.GetBytes(passwordHash),
+                Encoding.UTF8.GetBytes(newHash));
         }
         public static (bool IsStrong, string Rating) CheckPasswordStrength(string password)
         {

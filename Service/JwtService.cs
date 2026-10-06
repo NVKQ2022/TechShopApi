@@ -1,4 +1,4 @@
-﻿using TechShop_API_backend_.Data.Context;
+using TechShop_API_backend_.Data.Context;
 using TechShop_API_backend_.Models.Api;
 using TechShop_API_backend_.Helpers;
 using System.Security.Cryptography;
@@ -27,12 +27,15 @@ namespace TechShop_API_backend_.Service
             _configuration = configuration;
             this.userRepository = userRepository;
 
-            key = Encoding.ASCII.GetBytes(_configuration["JWT:Key"]);
-            issuer = _configuration["JwtConfig:Issuer"];
-            audience = _configuration["JwtConfig:Audience"];
+            var secretKey = _configuration["JWT:Key"] ?? _configuration["JWT__Key"] ?? "ThisIsASuperStrongSecretKey123456!";
+            key = Encoding.UTF8.GetBytes(secretKey);
+            issuer = _configuration["JwtConfig:Issuer"] ?? "TechShopApi";
+            audience = _configuration["JwtConfig:Audience"] ?? "TechShopApiUser";
             expireMinutes = _configuration.GetValue<int>("JwtConfig:ExpireMinutes");
-            
-                /*int.Parse(DateTime.UtcNow.AddMinutes(_configuration["Jwt:ExpireMinutes"] != null? Convert.ToDouble(_configuration["Jwt:ExpireMinutes"]): 30));*/ 
+            if (expireMinutes <= 0)
+            {
+                expireMinutes = 60;
+            }
 
 
 

@@ -233,7 +233,7 @@ Copy or update `appsettings.json` (or `appsettings.Development.json`) with your 
 }
 ```
 
-> **Note**: For production deployments, supply sensitive secrets using environment variables (e.g. `ConnectionString__UserDatabase`, `JWT__Key`, `ImageKit__PrivateKey`).
+> **Security Note**: `appsettings.json` and `appsettings.Development.json` contain sample/placeholder values for repository sharing. For local development, real credentials should be placed in **.NET User Secrets** (`dotnet user-secrets`) or in `appsettings.Development.local.json` (which is gitignored). For production, supply sensitive secrets via environment variables (e.g. `ConnectionString__UserDatabase`, `JWT__Key`, `ImageKit__PrivateKey`).
 
 ---
 
@@ -250,11 +250,26 @@ cd TechShopApi
 dotnet restore
 ```
 
-### 3. Apply SQL Server Migrations
-Apply Entity Framework Core migrations to initialize the authentication database:
+### 3. Build the Database (Code First Migration)
+
+You can build and initialize the SQL Server database schema from code using any of the following methods:
+
+**Option A — Programmatic Migration (No extra tools needed):**
 ```bash
+dotnet run -- --migrate
+```
+
+**Option B — EF Core CLI Tool:**
+```bash
+# Install EF tool if not already installed
+dotnet tool install --global dotnet-ef
+
+# Apply migrations
 dotnet ef database update
 ```
+
+**Option C — Standalone SQL Script (SSMS / Azure Data Studio / Docker):**
+Execute [`Migrations/InitialCreate.sql`](file:///home/quan/projects/techshop/TechShopApi/Migrations/InitialCreate.sql) directly on your SQL Server instance. It is fully idempotent and creates all required tables, indexes, and seed data safely.
 
 ### 4. Build and Run
 ```bash

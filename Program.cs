@@ -18,6 +18,11 @@ using Google.Apis.Auth.OAuth2;
 using TechShopApi.Helpers;
 var builder = WebApplication.CreateBuilder(args);
 
+// Load optional local configuration files (gitignored) for developer machine secrets
+builder.Configuration
+    .AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.local.json", optional: true, reloadOnChange: true);
+
 // Add services to the container.
 //builder.WebHost.UseUrls("http://*:8080");
 
@@ -157,12 +162,16 @@ builder.Services.AddRateLimiter(options =>
 
 
 var app = builder.Build();
-//using (var scope = app.Services.CreateScope())
-//{
-//    var rec = scope.ServiceProvider.GetRequiredService<RecommendationService>();
-//    await RecommendationService.BuildMatrix();
-//    Console.WriteLine("🔥 Matrix built at startup");
-//}
+
+if (args.Contains("--migrate"))
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AuthenticateDbContext>();
+    await dbContext.Database.MigrateAsync();
+    Console.WriteLine("Database migrations applied successfully.");
+    return;
+}
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

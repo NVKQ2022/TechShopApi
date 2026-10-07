@@ -17,12 +17,19 @@ namespace TechShop_API_backend_.Controllers.Api
     [Authorize]
     public class UserController : ControllerBase
     {
-        UserRepository _userRepository;
-        UserDetailRepository _userDetailRepository;
+        private readonly UserRepository _userRepository;
+        private readonly UserDetailRepository _userDetailRepository;
+
         public UserController(UserRepository userRepository, UserDetailRepository userDetailRepository)
         {
             _userRepository = userRepository;
             _userDetailRepository = userDetailRepository;
+        }
+
+        private bool TryGetUserId(out int userId)
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdStr, out userId);
         }
         // GET: api/<UserController>
         [Authorize(Roles = "Admin")]
@@ -90,11 +97,12 @@ namespace TechShop_API_backend_.Controllers.Api
         [HttpGet("Info/me")] // DONE
         public async Task<IActionResult> Info()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!TryGetUserId(out int userId))
+            {
+                return Unauthorized();
+            }
 
-
-            User? user = await _userRepository.GetUserByIdAsync(int.Parse(userId));
-
+            User? user = await _userRepository.GetUserByIdAsync(userId);
             if (user == null)
             {
                 return NotFound();
@@ -109,19 +117,22 @@ namespace TechShop_API_backend_.Controllers.Api
             return Ok(userResponseDto);
         }
 
-
         [Authorize]
         [HttpPost("Info/Profile/Add-receive-info")]
         public async Task<IActionResult> AddReceiveInfo([FromBody] ReceiveInfo receiveInfo)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userDetails = await _userDetailRepository.GetUserDetailAsync(int.Parse(userId));
+            if (!TryGetUserId(out int userId))
+            {
+                return Unauthorized();
+            }
+
+            var userDetails = await _userDetailRepository.GetUserDetailAsync(userId);
             if (userDetails == null)
             {
                 return NotFound();
             }
             userDetails.ReceiveInfo.Add(receiveInfo);
-            var updateResult = await _userDetailRepository.UpdateUserDetailAsync(int.Parse(userId), userDetails);
+            var updateResult = await _userDetailRepository.UpdateUserDetailAsync(userId, userDetails);
             if (!updateResult)
             {
                 return BadRequest("Failed to update receive info.");
@@ -129,12 +140,16 @@ namespace TechShop_API_backend_.Controllers.Api
             return Ok("Receive info updated successfully.");
         }
 
-
         [Authorize]
         [HttpDelete("Info/Profile/Delete-receive-info")]
-        public async Task<IActionResult> DeleteReceiveInfo([FromBody] ReceiveInfo receiveInfo) { 
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userDetails = await _userDetailRepository.GetUserDetailAsync(int.Parse(userId));
+        public async Task<IActionResult> DeleteReceiveInfo([FromBody] ReceiveInfo receiveInfo)
+        {
+            if (!TryGetUserId(out int userId))
+            {
+                return Unauthorized();
+            }
+
+            var userDetails = await _userDetailRepository.GetUserDetailAsync(userId);
             if (userDetails == null)
             {
                 return NotFound();
@@ -148,7 +163,7 @@ namespace TechShop_API_backend_.Controllers.Api
                 return NotFound("Receive info not found.");
             }
             userDetails.ReceiveInfo.Remove(infoToRemove);
-            var updateResult = await _userDetailRepository.UpdateUserDetailAsync(int.Parse(userId), userDetails);
+            var updateResult = await _userDetailRepository.UpdateUserDetailAsync(userId, userDetails);
             if (!updateResult)
             {
                 return BadRequest("Failed to update receive info.");
@@ -160,8 +175,12 @@ namespace TechShop_API_backend_.Controllers.Api
         [HttpPut("Info/Profile/add-personal-info")]
         public async Task<IActionResult> AddPersonalInfo([FromBody] PersonalInfoRequest personalInfo)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userDetails = await _userDetailRepository.GetUserDetailAsync(int.Parse(userId));
+            if (!TryGetUserId(out int userId))
+            {
+                return Unauthorized();
+            }
+
+            var userDetails = await _userDetailRepository.GetUserDetailAsync(userId);
             if (userDetails == null)
             {
                 return NotFound();
@@ -172,7 +191,7 @@ namespace TechShop_API_backend_.Controllers.Api
             userDetails.PhoneNumber = personalInfo.PhoneNumber;
             userDetails.Birthday = personalInfo.Birthday;
 
-            var updateResult = await _userDetailRepository.UpdateUserDetailAsync(int.Parse(userId), userDetails);
+            var updateResult = await _userDetailRepository.UpdateUserDetailAsync(userId, userDetails);
             if (!updateResult)
             {
                 return BadRequest("Failed to update personal info.");
@@ -180,17 +199,17 @@ namespace TechShop_API_backend_.Controllers.Api
             return Ok("Personal info update successful");
         }
 
-
-
-
         // GET api/<UserController>/Info/Details
         [Authorize]
         [HttpGet("Info/Profile")]
         public async Task<IActionResult> InfoDetails()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userDetails = await _userDetailRepository.GetUserDetailAsync(int.Parse(userId));
+            if (!TryGetUserId(out int userId))
+            {
+                return Unauthorized();
+            }
 
+            var userDetails = await _userDetailRepository.GetUserDetailAsync(userId);
             if (userDetails == null)
             {
                 return NotFound();
@@ -230,7 +249,9 @@ namespace TechShop_API_backend_.Controllers.Api
                 return BadRequest("The password is not strong enough.");
             }
 
-            if (SecurityHelper.VerifyPassword(updateUserDto.Password, userUpdate.Salt, userUpdate.Password))
+            if (!string.IsNullOrEmpty(userUpdate.Salt) &&
+                !string.IsNullOrEmpty(userUpdate.Password) &&
+                SecurityHelper.VerifyPassword(updateUserDto.Password, userUpdate.Salt, userUpdate.Password))
             {
                 return BadRequest("New password must be different from the old password.");
             }
@@ -260,14 +281,16 @@ namespace TechShop_API_backend_.Controllers.Api
             {
                 return BadRequest("Update need to have value");
             }
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!TryGetUserId(out int userId))
+            {
+                return Unauthorized();
+            }
 
-            if (await _userDetailRepository.UpdateUserDetailAsync(int.Parse(userId), userDetailsUpdate))
+            if (await _userDetailRepository.UpdateUserDetailAsync(userId, userDetailsUpdate))
             {
                 return Ok();
             }
             return BadRequest();
-
         }
 
 

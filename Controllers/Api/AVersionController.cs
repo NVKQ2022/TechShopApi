@@ -1,43 +1,32 @@
-﻿using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
-using System.IO;
 using TechShopApi.Helpers;
+
 namespace TechShopApi.Controllers.Api
 {
     [Route("api/[controller]")]
     [ApiController]
     public class AVersionController : ControllerBase
     {
-        VersionHelper versionHelper;
+        private readonly VersionHelper _versionHelper;
 
         public AVersionController(VersionHelper versionHelper)
         {
-            this.versionHelper = versionHelper;
+            _versionHelper = versionHelper;
         }
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult Version() //version2
+        public IActionResult Version()
         {
             var versionInfo = new
             {
-                Version = versionHelper.GetBuildInfo("VERSION"),
-                BuildDate = versionHelper.GetBuildInfo("BUILD_DATE"),
-                CommitHash = versionHelper.GetBuildInfo("COMMIT_HASH"),
-                test = 2    
+                Version = _versionHelper.GetBuildInfo("VERSION"),
+                BuildDate = _versionHelper.GetBuildInfo("BUILD_DATE"),
+                CommitHash = _versionHelper.GetBuildInfo("COMMIT_HASH"),
+                test = 2
             };
-            //var versionInfo = new
-            //{
-            //    Version = 1,
-            //    BuildDate =1 ,
-            //    CommitHash =1 
-            //};
             return Ok(versionInfo);
         }
-
-        
     }
 }

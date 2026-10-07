@@ -15,14 +15,15 @@ namespace TechShop_API_backend_.Controllers.Api
     [ApiController]
     public class OrderController : ControllerBase
     {
-        OrderRepository _orderRepository;
-        ProductRepository _productRepository;
-        ConverterHelper converterHelper;
+        private readonly OrderRepository _orderRepository;
+        private readonly ProductRepository _productRepository;
+        private readonly ConverterHelper _converterHelper;
+
         public OrderController(OrderRepository orderRepository, ProductRepository productRepository, ConverterHelper converterHelper)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
-            this.converterHelper = converterHelper;
+            _converterHelper = converterHelper;
         }
 
 
@@ -125,7 +126,7 @@ namespace TechShop_API_backend_.Controllers.Api
                 }
 
                 // Add the product to the order items after converting it
-                orderItemsVerify.Add(converterHelper.ConvertProductToOrderItem(product, item.Quantity));
+                orderItemsVerify.Add(_converterHelper.ConvertProductToOrderItem(product, item.Quantity));
 
                 // Calculate total amount
                 totalCalculatedAmount += product.Price * item.Quantity;
@@ -362,7 +363,7 @@ namespace TechShop_API_backend_.Controllers.Api
                 await _productRepository.DecreaseProductStockAsync(item.ProductID, item.Quantity);
 
                 // Build order item using verified database price
-                var orderItem = converterHelper.ConvertProductToOrderItem(product, item.Quantity);
+                var orderItem = _converterHelper.ConvertProductToOrderItem(product, item.Quantity);
                 orderItem.UnitPrice = product.Price;
 
                 orderItemsVerify.Add(orderItem);

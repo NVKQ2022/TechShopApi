@@ -1,11 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TechShop_API_backend_.Models;
 using TechShop_API_backend_.Data;
-
-using Amazon.S3;
-using Amazon.S3.Model;
 using TechShop_API_backend_.Service;
 using TechShop_API_backend_.DTOs.Review;
 

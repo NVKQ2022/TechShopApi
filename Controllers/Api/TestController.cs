@@ -16,31 +16,27 @@ namespace TechShop_API_backend_.Controllers.Api
     public class TestController : ControllerBase
     {
         private readonly IConfiguration _config;
-        UserRepository _userRepository;
-        VerificationCodeRepository _verificationCodeRepository;
-        UserDetailRepository _userDetailRepository;
-        ProductRepository _productRepository;
-        SecurityHelper _securityHelper;
-        JwtService _jwtService;
-        EmailService emailService;
+        private readonly UserRepository _userRepository;
+        private readonly VerificationCodeRepository _verificationCodeRepository;
+        private readonly UserDetailRepository _userDetailRepository;
+        private readonly ProductRepository _productRepository;
+        private readonly SecurityHelper _securityHelper;
+        private readonly JwtService _jwtService;
+        private readonly EmailService _emailService;
         private readonly ILogger<AuthenticateController> _logger;
         private readonly AuthProviderRepository _authProviderRepository;
-        private string _googleClientId = Environment.GetEnvironmentVariable("GoogleOAuth__ClientId") ?? "";
-
 
         public TestController(
-                            IConfiguration config,
-                            UserRepository userRepository,
-                            UserDetailRepository userDetailRepository,
-                            ProductRepository productRepository,
-                            JwtService jwtService,
-                            ILogger<AuthenticateController> logger,
-                            AuthProviderRepository authProviderRepository,
-                            VerificationCodeRepository verificationCodeRepository,
-                            EmailService emailService,
-                            SecurityHelper securityHelper
-                            )
-
+            IConfiguration config,
+            UserRepository userRepository,
+            UserDetailRepository userDetailRepository,
+            ProductRepository productRepository,
+            JwtService jwtService,
+            ILogger<AuthenticateController> logger,
+            AuthProviderRepository authProviderRepository,
+            VerificationCodeRepository verificationCodeRepository,
+            EmailService emailService,
+            SecurityHelper securityHelper)
         {
             _config = config;
             _productRepository = productRepository;
@@ -50,7 +46,7 @@ namespace TechShop_API_backend_.Controllers.Api
             _logger = logger;
             _authProviderRepository = authProviderRepository;
             _verificationCodeRepository = verificationCodeRepository;
-            this.emailService = emailService;
+            _emailService = emailService;
             _securityHelper = securityHelper;
         }
 

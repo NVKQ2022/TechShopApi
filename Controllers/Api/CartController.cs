@@ -17,14 +17,15 @@ namespace TechShop_API_backend_.Controllers.Api
     public class CartController : ControllerBase
     {
 
-        UserDetailRepository _userDetailRepository;
-        ProductRepository _productRepository;
-        ConverterHelper converterHelper = new ConverterHelper();
+        private readonly UserDetailRepository _userDetailRepository;
+        private readonly ProductRepository _productRepository;
+        private readonly ConverterHelper _converterHelper;
 
-        public CartController(UserDetailRepository userDetailRepository, ProductRepository productRepository)
+        public CartController(UserDetailRepository userDetailRepository, ProductRepository productRepository, ConverterHelper converterHelper)
         {
             _userDetailRepository = userDetailRepository;
             _productRepository = productRepository;
+            _converterHelper = converterHelper;
         }
 
         private bool TryGetUserId(out int userId)
@@ -87,7 +88,7 @@ namespace TechShop_API_backend_.Controllers.Api
 
             // ✅ Step 4: Build verified CartItem
 
-            var cartItem = converterHelper.ConvertProductToCartItem(product);
+            var cartItem = _converterHelper.ConvertProductToCartItem(product);
 
 
             // ✅ Step 5: Add to cart in DB

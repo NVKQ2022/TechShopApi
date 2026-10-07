@@ -138,7 +138,7 @@ namespace TechShop_API_backend_.Controllers.Api
 
         public class SignInTokenRequest
         {
-            public string IdToken { get; set; }
+            public string IdToken { get; set; } = string.Empty;
         }
 
 
@@ -152,32 +152,38 @@ namespace TechShop_API_backend_.Controllers.Api
             {
                 var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(request.IdToken);
 
-                string uid = string.Empty;
-                string email = string.Empty;
+                string uid = decodedToken.Uid;
+                string? email = null;
                 string provider = string.Empty;
+
                 if (decodedToken.Claims != null && decodedToken.Claims.TryGetValue("firebase", out var firebaseObj))
                 {
-                    // firebaseObj is usually a Dictionary<string, object>
                     if (firebaseObj is IDictionary<string, object> firebaseDict &&
                         firebaseDict.TryGetValue("sign_in_provider", out var signInProviderObj) &&
                         signInProviderObj != null)
                     {
-                        uid = decodedToken.Uid;
-                        email = decodedToken.Claims.ContainsKey("email") ? decodedToken.Claims["email"].ToString() : null;
-                        provider = signInProviderObj.ToString(); // e.g. "google.com", "facebook.com", "apple.com"
+                        provider = signInProviderObj.ToString() ?? string.Empty;
                     }
-
                 }
 
+                if (decodedToken.Claims != null && decodedToken.Claims.TryGetValue("email", out var emailClaim) && emailClaim != null)
+                {
+                    email = emailClaim.ToString();
+                }
 
-                // Find or create user in your DB
+                if (string.IsNullOrEmpty(email))
+                {
+                    return BadRequest(new { message = "Email claim missing from Firebase token." });
+                }
+
+                // Find or create user in DB
                 var user = await _userRepository.GetUserByEmailAsync(email);
                 if (user == null)
                 {
                     var createResult = await _userRepository.CreateUserAsync(email, email.Split('@')[0], "", uid, false);
-                    if (!createResult.Success && createResult.ErrorMessage != null)
+                    if (!createResult.Success || createResult.CreatedUser == null)
                     {
-                        return BadRequest(new { message = createResult.ErrorMessage });
+                        return BadRequest(new { message = createResult.ErrorMessage ?? "Failed to create user." });
                     }
                     user = createResult.CreatedUser;
                 }
@@ -255,13 +261,16 @@ namespace TechShop_API_backend_.Controllers.Api
                     {
                         // Create new user
                         var createResult = await _userRepository.CreateUserAsync(email, name, string.Empty, googleId, false);
+                        if (!createResult.Success || createResult.CreatedUser == null)
+                        {
+                            return BadRequest(new { message = createResult.ErrorMessage ?? "Failed to create user from Google profile." });
+                        }
                         user = createResult.CreatedUser;
                     }
 
                     // 5️⃣ Create new auth provider link
                     var newProvider = new AuthProvider
                     {
-
                         UserId = user.Id,
                         Provider = "google",
                         ProviderUserId = googleId,
@@ -419,10 +428,14 @@ namespace TechShop_API_backend_.Controllers.Api
                 if (isMatched)
                 {
                     await _verificationCodeRepository.DeleteAsync(email, "EMAIL_VERIFY", token);
-                    var user =await _userRepository.GetUserByEmailAsync(email);
-                    user.IsEmailVerified = true;
-                    await _userRepository.UpdateUserAsync(user);
-                    return Ok(new { Message = $"{user.Username} , your email ({email}) successfully verified , with {token} ." });
+                    var user = await _userRepository.GetUserByEmailAsync(email);
+                    if (user != null)
+                    {
+                        user.IsEmailVerified = true;
+                        await _userRepository.UpdateUserAsync(user);
+                        return Ok(new { Message = $"{user.Username}, your email ({email}) was successfully verified with {token}." });
+                    }
+                    return NotFound(new { Message = "User not found." });
                 }
                 else
                 {
@@ -432,6 +445,7 @@ namespace TechShop_API_backend_.Controllers.Api
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to verify email for {Email}", email);
                 return StatusCode(500, new { Message = "An error occurred while processing your request. Please try again later." });
             }
         }
@@ -518,19 +532,27 @@ namespace TechShop_API_backend_.Controllers.Api
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var user = await _userRepository.GetUserByIdAsync(int.Parse(userId!));
-                if (user == null)
-                    return BadRequest("User not found.");
+                var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(userIdStr, out int userId))
+                {
+                    return Unauthorized(new { Message = "Invalid user token." });
+                }
+
+                var user = await _userRepository.GetUserByIdAsync(userId);
+                if (user == null || string.IsNullOrEmpty(user.Salt) || string.IsNullOrEmpty(user.Password))
+                {
+                    return BadRequest("User not found or credentials not initialized.");
+                }
+
                 // Verify current password
                 if (!SecurityHelper.VerifyPassword(changePasswordDto.CurrentPassword, user.Salt, user.Password))
                 {
                     return BadRequest("Current password is incorrect.");
                 }
                 var result = SecurityHelper.CheckPasswordStrength(changePasswordDto.NewPassword);
-                if (result.IsStrong == false)
+                if (!result.IsStrong)
                 {
-                    return BadRequest($"The password  is not strong enough");
+                    return BadRequest("The password is not strong enough.");
                 }
                 // Update password
                 var salt = SecurityHelper.GenerateSalt();
@@ -546,6 +568,7 @@ namespace TechShop_API_backend_.Controllers.Api
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error changing password for user");
                 return StatusCode(500, new { Message = "An error occurred while processing your request. Please try again later." });
             }
         }
@@ -598,6 +621,7 @@ namespace TechShop_API_backend_.Controllers.Api
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to reset password for email {Email}", forgotPasswordDto.email);
                 return StatusCode(500, new { Message = "An error occurred while processing your request. Please try again later." });
             }
         }
@@ -684,6 +708,7 @@ namespace TechShop_API_backend_.Controllers.Api
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to verify password reset OTP for email {Email}", verifyOtpDto.email);
                 return StatusCode(500, new { Message = "An error occurred while processing your request. Please try again later." });
             }
         }

@@ -144,8 +144,7 @@ public class ProductRepository
     {
         if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
         {
-            //return Ok(new List<ProductSuggestionDto>());
-            return null;
+            return new List<Product>();
         }
         var filter = Builders<Product>.Filter.Regex(p => p.Name, new BsonRegularExpression(new Regex(query, RegexOptions.IgnoreCase | RegexOptions.Multiline)));
 
@@ -169,7 +168,7 @@ public class ProductRepository
 
 
 
-    public async Task<List<Product>> GetRandomProductAsync(int number, List<string> categories)
+    public async Task<List<Product>> GetRandomProductAsync(int number, List<string>? categories)
     {
         // Create the base pipeline
         var pipeline = new List<BsonDocument>();

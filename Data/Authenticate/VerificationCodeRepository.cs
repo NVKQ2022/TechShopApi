@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TechShop.API.Models;
@@ -24,33 +24,33 @@ namespace TechShop.API.Repositories
         }
 
         // Get by code (e.g., token lookup)
-        public async Task<VerificationCode> GetByCodeAsync(string code)
+        public async Task<VerificationCode?> GetByCodeAsync(string code)
         {
             return await _context.Set<VerificationCode>()
                 .FirstOrDefaultAsync(v => v.Code == code);
         }
 
 
-        public async Task<VerificationCode> GetVerificationByEmailAsync(string email)
+        public async Task<VerificationCode?> GetVerificationByEmailAsync(string email)
         {
             return await _context.Set<VerificationCode>()
                 .FirstOrDefaultAsync(v => v.Email == email);
         }
 
-        public async Task<VerificationCode> GetVerificationByTypeAsync(string type)
+        public async Task<VerificationCode?> GetVerificationByTypeAsync(string type)
         {
             return await _context.Set<VerificationCode>()
                 .FirstOrDefaultAsync(v => v.Type == type);
         }
 
-        public async Task<VerificationCode> GetVerificationByEmailNotExpireAsync(string email)
+        public async Task<VerificationCode?> GetVerificationByEmailNotExpireAsync(string email)
         {
             return await _context.Set<VerificationCode>()
                 .FirstOrDefaultAsync(v => v.Email == email && v.ExpiresAt > DateTime.UtcNow);
         }
 
         // Get latest unused code by email and type
-        public async Task<VerificationCode> GetLatestAsync(string email, string type)
+        public async Task<VerificationCode?> GetLatestAsync(string email, string type)
         {
             return await _context.Set<VerificationCode>()
                 .FirstOrDefaultAsync(v =>

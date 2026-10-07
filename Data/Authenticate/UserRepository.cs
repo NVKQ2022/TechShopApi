@@ -1,4 +1,4 @@
-﻿using TechShop_API_backend_.Data.Context;
+using TechShop_API_backend_.Data.Context;
 using TechShop_API_backend_.Helpers;
 using TechShop_API_backend_.Models;
 using Microsoft.EntityFrameworkCore;
@@ -159,7 +159,7 @@ namespace TechShop_API_backend_.Data.Authenticate
                 // Step 1: Read current ID
                 var selectCommand = new SqlCommand("SELECT ID FROM userId", connection, transaction);
                 var result = await selectCommand.ExecuteScalarAsync();
-                currentId = (int)result;
+                currentId = (result != null && result != DBNull.Value) ? Convert.ToInt32(result) : 0;
 
                 // Step 2: Increment ID
                 var updateCommand = new SqlCommand("UPDATE userId SET ID = @newId", connection, transaction);

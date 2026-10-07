@@ -50,7 +50,7 @@ namespace TechShop_API_backend_.Data
         }
 
 
-        public async Task<Order> ChooseProductToReview(string orderId)
+        public async Task<Order?> ChooseProductToReview(string orderId)
         {
             var order = await _orders.Find(o => o.OrderID == orderId).FirstOrDefaultAsync();
             if (order == null || order.Status != "Delivered")

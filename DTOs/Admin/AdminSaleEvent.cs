@@ -1,9 +1,9 @@
 // DTO trả về cho FE
 public class AdminSaleEventDto
 {
-  public string Id { get; set; }          // Mongo ObjectId string
-  public string Title { get; set; }       // Tên event
-  public string Color { get; set; }       // "Danger" | "Success" | "Primary" | "Warning"
+  public string Id { get; set; } = string.Empty;          // Mongo ObjectId string
+  public string Title { get; set; } = string.Empty;       // Tên event
+  public string Color { get; set; } = string.Empty;       // "Danger" | "Success" | "Primary" | "Warning"
   public DateTime StartDate { get; set; } // UTC
   public DateTime EndDate { get; set; }   // UTC
   public double Percent { get; set; }     // 0–1 (vd 0.2 = 20%)
@@ -13,8 +13,8 @@ public class AdminSaleEventDto
 // DTO tạo mới
 public class CreateAdminSaleEventDto
 {
-  public string Title { get; set; }
-  public string Color { get; set; }
+  public string Title { get; set; } = string.Empty;
+  public string Color { get; set; } = string.Empty;
   public DateTime StartDate { get; set; }
   public DateTime EndDate { get; set; }
   public double Percent { get; set; }          // 0–1
@@ -24,8 +24,8 @@ public class CreateAdminSaleEventDto
 // DTO update
 public class UpdateAdminSaleEventDto
 {
-  public string Title { get; set; }
-  public string Color { get; set; }
+  public string Title { get; set; } = string.Empty;
+  public string Color { get; set; } = string.Empty;
   public DateTime StartDate { get; set; }
   public DateTime EndDate { get; set; }
   public double Percent { get; set; }

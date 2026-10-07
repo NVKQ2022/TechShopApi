@@ -1,8 +1,8 @@
-﻿namespace TechShop_API_backend_.DTOs.CartItem
+namespace TechShop_API_backend_.DTOs.CartItem
 {
     public class CreateCartItemRequest
     {
-        public string ProductId { get; set; }
+        public string ProductId { get; set; } = string.Empty;
         public int Quantity { get; set; }
     }
 }

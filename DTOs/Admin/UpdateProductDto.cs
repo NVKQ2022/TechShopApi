@@ -5,7 +5,7 @@ namespace TechShop_API_backend_.DTOs.Admin
   public class UpdateProductDto
   {
     [Required]
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     public string? Description { get; set; }
 
@@ -19,7 +19,7 @@ namespace TechShop_API_backend_.DTOs.Admin
     public Dictionary<string, string>? Detail { get; set; }
 
     [Required]
-    public string Category { get; set; }
+    public string Category { get; set; } = string.Empty;
 
     [Range(0, int.MaxValue)]
     public int Stock { get; set; }

@@ -2,12 +2,12 @@ namespace TechShop_API_backend_.DTOs.Admin
 {
   public class AdminProductOverviewDto
   {
-    public string ProductId { get; set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public string Category { get; set; }
+    public string ProductId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
     public int Price { get; set; }
-    public List<string> Color { get; set; }
+    public List<string> Color { get; set; } = new List<string>();
     public int Stock { get; set; }
     public int Sold { get; set; }
 
@@ -24,7 +24,7 @@ namespace TechShop_API_backend_.DTOs.Admin
     public double? SalePercent { get; set; }
     public DateTime? SaleStart { get; set; }
     public DateTime? SaleEnd { get; set; }
-    public List<string> ImageURL { get; set; }
+    public List<string> ImageURL { get; set; } = new List<string>();
 
     // Order statistics for this product
     public int TotalOrders { get; set; }

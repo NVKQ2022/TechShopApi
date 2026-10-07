@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace TechShop_API_backend_.DTOs.User
 {
@@ -6,16 +6,16 @@ namespace TechShop_API_backend_.DTOs.User
     {
 
         [Required, EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required, MinLength(3)]
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         [Required, MinLength(8)]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         [Required, MinLength(8)]
-        public string ConfirmPassword { get; set; }
+        public string ConfirmPassword { get; set; } = string.Empty;
 
 
     }

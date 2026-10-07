@@ -1,10 +1,9 @@
-﻿namespace TechShopApi.Helpers
+namespace TechShopApi.Helpers
 {
     public class VersionHelper
     {
-        public string GetBuildInfo(string key)
+        public string? GetBuildInfo(string key)
         {
-            // Path to the buildinfo.txt file
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "buildinfo.txt");
 
             if (File.Exists(filePath))
@@ -12,15 +11,18 @@
                 var lines = File.ReadAllLines(filePath);
                 foreach (var line in lines)
                 {
-                    if (line.StartsWith(key))
+                    if (line.StartsWith(key, StringComparison.OrdinalIgnoreCase))
                     {
-                        // Split each line by '=' and return the value after '='
-                        return line.Split('=')[1];
+                        var parts = line.Split('=', 2);
+                        if (parts.Length == 2)
+                        {
+                            return parts[1].Trim();
+                        }
                     }
                 }
             }
 
-            return null; // Return null if the file doesn't exist or key not found
+            return null;
         }
     }
 }

@@ -53,18 +53,18 @@ namespace TechShop_API_backend_.Service
 
     public class VietQrRequest
     {
-        public string bankCode { get; set; }
-        public string bankAccount { get; set; }
-        public string userBankName { get; set; }
-        public string content { get; set; }
+        public string? bankCode { get; set; }
+        public string? bankAccount { get; set; }
+        public string? userBankName { get; set; }
+        public string? content { get; set; }
         public int qrType { get; set; }
         public long? amount { get; set; }
-        public string orderId { get; set; }
-        public string transType { get; set; }
-        public string terminalCode { get; set; }
-        public string serviceCode { get; set; }
-        public string urlLink { get; set; }
-        public string note { get; set; }
+        public string? orderId { get; set; }
+        public string? transType { get; set; }
+        public string? terminalCode { get; set; }
+        public string? serviceCode { get; set; }
+        public string? urlLink { get; set; }
+        public string? note { get; set; }
     }
 
 

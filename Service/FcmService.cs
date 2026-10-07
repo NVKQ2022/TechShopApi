@@ -1,4 +1,4 @@
-﻿using FirebaseAdmin;
+using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using TechShop_API_backend_.Data.Authenticate;
@@ -25,10 +25,13 @@ namespace TechShop_API_backend_.Service
             // Initialize Firebase only once
             if (FirebaseApp.DefaultInstance == null)
             {
+#pragma warning disable CS0618
+                var credential = GoogleCredential.FromFile(credentialPath);
+#pragma warning restore CS0618
                 FirebaseApp.Create(new AppOptions()
                 {
-                Credential = GoogleCredential.FromFile(credentialPath)
-            });
+                    Credential = credential
+                });
             }
         }
 

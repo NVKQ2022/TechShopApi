@@ -5,13 +5,11 @@ using TechShop_API_backend_.Models;
 
 namespace TechShop_API_backend_.Service
 {
-    public  class RecommendationService
+    public class RecommendationService
     {
-        private static OrderRepository _orderRepository;
-        private static ProductRepository _productRepository;
+        private static OrderRepository? _orderRepository;
+        private static ProductRepository? _productRepository;
 
-
-        // Lưu ma trận giống như trước
         public static ConcurrentDictionary<string, ConcurrentDictionary<string, int>> SimilarityMatrix
             = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
 
@@ -132,7 +130,7 @@ namespace TechShop_API_backend_.Service
         public static async Task<List<Product>> RecommendProducts(string productId, int limit = 5)
         {
             var ids = RecommendProductIds(productId, limit * 3);
-            if (ids.Count == 0)
+            if (ids.Count == 0 || _productRepository == null)
                 return new List<Product>();
 
             var baseProduct = await _productRepository.GetByIdAsync(productId);

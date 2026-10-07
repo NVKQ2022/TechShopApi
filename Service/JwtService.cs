@@ -41,27 +41,25 @@ namespace TechShop_API_backend_.Service
 
         }
 
-        public async Task<LoginResponse>? Authenticate(LoginRequest? request) // returns null if authentication fails ( wrong username or password)  
+        public async Task<LoginResponse?> Authenticate(LoginRequest? request)
         {
-            if(request == null || string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
+            if (request == null || string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
             {
                 return null;
             }
             var user = await userRepository.GetUserByUsernameAsync(request.Username);
-            if (user == null|| !SecurityHelper.VerifyPassword(request.Password, user.Salt, user.Password))
+            if (user == null || string.IsNullOrEmpty(user.Salt) || string.IsNullOrEmpty(user.Password) || !SecurityHelper.VerifyPassword(request.Password, user.Salt, user.Password))
             {
                 return null;
             }
-           
 
             return new LoginResponse 
             { 
                 Token = GenerateToken(user), 
-                IsAdmin = user.IsAdmin , 
+                IsAdmin = user.IsAdmin, 
                 UserId = user.Id, 
                 Username = user.Username, 
-                ExpiresIn =  expireMinutes*60 // for testing purpose only
-                /*(int)DateTime.UtcNow.AddMinutes(expireMinutes).Subtract(DateTime.UtcNow).TotalSeconds*/
+                ExpiresIn = expireMinutes * 60
             };
         }
 

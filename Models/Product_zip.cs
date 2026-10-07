@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
 namespace TechShop_API_backend_.Models
@@ -6,15 +6,15 @@ namespace TechShop_API_backend_.Models
     public class Product_zip
     {
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Product_zipId { get; set; }
+        public string Product_zipId { get; set; } = string.Empty;
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public int QuantitySold { get; set; }
 
-        public string Image { get; set; } //first img of the list
+        public string? Image { get; set; } //first img of the list
 
-        public SaleInfo Sale { get; set; }
+        public SaleInfo? Sale { get; set; }
 
         public int Price { get; set; }
 

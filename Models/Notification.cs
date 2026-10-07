@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace TechShop_API_backend_.Models
@@ -7,14 +7,14 @@ namespace TechShop_API_backend_.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } =null!;
+        public string Id { get; set; } = string.Empty;
 
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         // Dictionary for multiple key-value messages
         public Dictionary<string, string> Body { get; set; } = new Dictionary<string, string>();
 
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         public bool IsRead { get; set; } = false;
 

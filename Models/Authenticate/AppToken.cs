@@ -1,10 +1,10 @@
-﻿namespace TechShop_API_backend_.Models.Authenticate
+namespace TechShop_API_backend_.Models.Authenticate
 {
     public class AppToken
     {
         public int UserId { get; set; }
-        public string Token { get; set; }
-        public string UserName { get; set; }
+        public string Token { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
 
         public bool IsAdmin { get; set; }
 

@@ -1,10 +1,10 @@
-﻿namespace TechShop_API_backend_.Models
+namespace TechShop_API_backend_.Models
 {
     public class WishlistItem
     {
-        public string ProductId { get; set; }
-        public string ProductName { get; set; }
-        public string Image { get; set; }
+        public string ProductId { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public string? Image { get; set; }
         public int UnitPrice { get; set; }
     }
 }

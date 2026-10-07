@@ -5,10 +5,10 @@ public class ProductSaleEvent
 {
   [BsonId]
   [BsonRepresentation(BsonType.ObjectId)]
-  public string Id { get; set; }
+  public string Id { get; set; } = string.Empty;
 
-  public string Title { get; set; }
-  public string Color { get; set; } // "Danger" | "Success" | "Primary" | "Warning"
+  public string Title { get; set; } = string.Empty;
+  public string Color { get; set; } = string.Empty; // "Danger" | "Success" | "Primary" | "Warning"
 
   [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
   public DateTime StartDate { get; set; }

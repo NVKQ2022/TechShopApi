@@ -1,4 +1,4 @@
-﻿namespace TechShop_API_backend_.Models
+namespace TechShop_API_backend_.Models
 {
     public class Rating
     {
@@ -6,7 +6,7 @@
         public int ProductID { get; set; }
         public int UserID { get; set; }
         public int Stars { get; set; }
-        public string Comment { get; set; }
+        public string Comment { get; set; } = string.Empty;
         public DateTime CreatedTime { get; set; }
         public List<string>? MediaURLs {  get; set; }
     }

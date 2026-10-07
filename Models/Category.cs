@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
 namespace TechShop_API_backend_.Models
@@ -7,17 +7,17 @@ namespace TechShop_API_backend_.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string CategoryId { get; set; }
+        public string CategoryId { get; set; } = string.Empty;
 
-        public string CateName { get; set; }
+        public string CateName { get; set; } = string.Empty;
 
-        public string Image {  get; set; }
+        public string Image { get; set; } = string.Empty;
         public int BuyTime { get; set; }
 
         public int ProductQuantity { get; set; }
 
         [BsonRepresentation(BsonType.ObjectId)]
-        public List<string> Products { get; set; }
+        public List<string> Products { get; set; } = new List<string>();
     }
 
    

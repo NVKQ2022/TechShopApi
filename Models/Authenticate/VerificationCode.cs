@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -18,17 +18,17 @@ namespace TechShop.API.Models
         [Required]
         [Column("EMAIL")]
         [MaxLength(255)]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         [Column("CODE")]
         [MaxLength(100)]
-        public string Code { get; set; }
+        public string Code { get; set; } = string.Empty;
 
         [Required]
         [Column("TYPE")]
         [MaxLength(50)]
-        public string Type { get; set; }
+        public string Type { get; set; } = string.Empty;
 
         [Required]
         [Column("EXPIRES_AT")]

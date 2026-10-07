@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace TechShop_API_backend_.Models.Authenticate
@@ -14,7 +14,7 @@ namespace TechShop_API_backend_.Models.Authenticate
         public int UserId { get; set; }
 
         [ForeignKey("UserId")]
-        public User User { get; set; }   // navigation property
+        public User? User { get; set; }   // navigation property
 
         [Required]
         [MaxLength(50)]

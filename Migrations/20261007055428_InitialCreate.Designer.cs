@@ -9,10 +9,10 @@ using TechShop_API_backend_.Data.Context;
 
 #nullable disable
 
-namespace TechShop_API_backend_.Migrations
+namespace TechShopApi.Migrations
 {
     [DbContext(typeof(AuthenticateDbContext))]
-    [Migration("20251025154102_InitialCreate")]
+    [Migration("20261007055428_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -25,6 +25,56 @@ namespace TechShop_API_backend_.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("TechShop.API.Models.VerificationCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("CODE");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("CREATED_AT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("EMAIL");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("EXPIRES_AT");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit")
+                        .HasColumnName("IS_USED");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("TYPE");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("USED_AT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("USER_ID");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VERIFICATION_CODES", (string)null);
+                });
+
             modelBuilder.Entity("TechShop_API_backend_.Models.Authenticate.AuthProvider", b =>
                 {
                     b.Property<Guid>("Id")
@@ -33,11 +83,10 @@ namespace TechShop_API_backend_.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("AccessToken")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("access_token");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
 
@@ -48,7 +97,6 @@ namespace TechShop_API_backend_.Migrations
                         .HasColumnName("provider");
 
                     b.Property<string>("ProviderEmail")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("provider_email");
@@ -60,7 +108,6 @@ namespace TechShop_API_backend_.Migrations
                         .HasColumnName("provider_user_id");
 
                     b.Property<string>("RefreshToken")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("refresh_token");
 
@@ -68,7 +115,7 @@ namespace TechShop_API_backend_.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("token_expires_at");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_at");
 
@@ -80,57 +127,19 @@ namespace TechShop_API_backend_.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("auth_providers");
-                });
-
-            modelBuilder.Entity("TechShop_API_backend_.Models.Authenticate.OTPCode", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("ID");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("CREATED_AT");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("EMAIL");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("EXPIRES_AT");
-
-                    b.Property<bool>("IsVerified")
-                        .HasColumnType("bit")
-                        .HasColumnName("IS_VERIFIED");
-
-                    b.Property<string>("OTPCodeValue")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("OTP_CODE");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("USER_ID");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OTP_CODES");
+                    b.ToTable("auth_providers", (string)null);
                 });
 
             modelBuilder.Entity("TechShop_API_backend_.Models.Authenticate.User", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
                         .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("GOOGLE_ID")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsAdmin")
@@ -149,24 +158,51 @@ namespace TechShop_API_backend_.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("TechShop_API_backend_.Models.Authenticate.UserFcm", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("USER_ID");
+
+                    b.Property<string>("FcmToken")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("FCM_TOKEN");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("USER_FCM", (string)null);
                 });
 
             modelBuilder.Entity("TechShop_API_backend_.Models.Authenticate.UserId", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("int")
+                        .HasColumnName("ID");
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserId");
+                    b.ToTable("userId", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 10000
+                        });
                 });
 
             modelBuilder.Entity("TechShop_API_backend_.Models.Authenticate.AuthProvider", b =>

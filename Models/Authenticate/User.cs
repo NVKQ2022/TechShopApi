@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TechShop_API_backend_.Models.Authenticate
 {
@@ -6,6 +7,7 @@ namespace TechShop_API_backend_.Models.Authenticate
     {
 
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
         [Required]
         public string Email { get; set; } = string.Empty;
@@ -29,6 +31,9 @@ namespace TechShop_API_backend_.Models.Authenticate
     }
     public class UserId
     {
+        [Key]
+        [Column("ID")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
     }

@@ -8,6 +8,7 @@ public class UserFcm
 {
     [Key]
     [Column("USER_ID")]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public int UserId { get; set; }
 
     [Column("FCM_TOKEN")]
